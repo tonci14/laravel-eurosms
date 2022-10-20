@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tonci14\LaravelEuroSMS\Tests\Unit;
 
-use App\Exceptions\InvalidArgumentException;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Tonci14\LaravelEuroSMS\EuroSmsService;
+use Tonci14\LaravelEuroSMS\Exceptions\InvalidArgumentException;
 
 class TestInit extends TestCase
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tonci14\LaravelEuroSMS;
+namespace Tonci14\LaravelEuroSMS\Jobs;
 
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
@@ -8,8 +8,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Tonci14\LaravelEuroSMS\EuroSmsService;
 
-class SendEuroSmsJob implements ShouldQueue
+final class SendEuroSmsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
