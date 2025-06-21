@@ -2,45 +2,69 @@
 
 namespace Tonci14\LaravelEuroSMS\Jobs;
 
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Tonci14\LaravelEuroSMS\EuroSmsService;
+use Tonci14\LaravelEuroSMS\Facades\EuroSms;
 
-final class SendEuroSmsJob implements ShouldQueue
+class SendEuroSmsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    private string $target;
-    private string $content;
-    private ?string $sender;
+    protected string $phoneNumber;
+    protected string $content;
+    protected ?string $senderName;
+    protected ?string $locale;
+    public ?int$userId;
 
-    /**
-     * @param string $target
-     * @param string $content
-     * @param string|null $sender
-     * @param string|null $queue
-     */
-    public function __construct(string $target, string $content, ?string $sender = null, ?string $queue = null)
+    public function __construct(string $phoneNumber, string $content, ?string $senderName = null,  ?string $locale = null, ?int $userId = null)
     {
-        $this->onQueue($queue ?? "default");
-        $this->target = $target;
+        $this->phoneNumber = $phoneNumber;
         $this->content = $content;
-        $this->sender = $sender;
+        $this->senderName = $senderName;
+        $this->locale = $locale;
+        $this->userId = $userId;
     }
 
     /**
-     * Execute the job.
-     *
-     * @param EuroSmsService $smsService
-     * @return bool
-     * @throws GuzzleException
+     * @return void
      */
-    public function handle(EuroSmsService $smsService): bool
+    public function handle(): void
     {
-        return $smsService->send($this->target, $this->content, $this->sender);
+        EuroSms::send($this->phoneNumber, $this->content, $this->userId, $this->senderName);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPhoneNumber(): string
+    {
+        return $this->phoneNumber;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getUserId(): ?int
+    {
+        return $this->userId;
     }
 }
