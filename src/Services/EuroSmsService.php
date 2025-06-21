@@ -35,13 +35,19 @@ class EuroSmsService
         $phone = $this->validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
-        $requestData = $this->buildRequest($phone, $message, $senderName);
+        if ($phoneNumber !== "+421900000000") {
+            $requestData = $this->buildRequest($phone, $message, $senderName);
 
-        $client = new Client();
-        $result = $client->get(
-            $this->config['url'] . "?" . http_build_query($requestData['data']), $requestData['headers']
-        );
-        $sent = $result->getStatusCode() == 200;
+            $client = new Client();
+            $result = $client->get(
+                $this->config['url'] . "?" . http_build_query($requestData['data']), $requestData['headers']
+            );
+            $sent = $result->getStatusCode() == 200;
+            $error = !$sent ? $result->getBody()->getContents() : null;
+        } else {
+            $sent = true;
+            $error = "Fake phone number";
+        }
 
         if (!$sent) {
             SmsMessage::create([
@@ -49,7 +55,7 @@ class EuroSmsService
                 'phone'   => $phone,
                 'message' => $message,
                 'status'  => 'sent',
-                'error'   => $result->getBody()->getContents(),
+                'error'   => $error,
                 'sent_at' => null,
             ]);
             throw new \Exception('Failed to send sms with error: ' . $result->getReasonPhrase());
@@ -60,7 +66,7 @@ class EuroSmsService
             'phone'   => $phone,
             'message' => $message,
             'status'  => 'sent',
-            'error'   => null,
+            'error'   => $error,
             'sent_at' => now(),
         ]);
     }
@@ -80,7 +86,7 @@ class EuroSmsService
         ?int    $userId = null,
         ?string $senderName = null,
         ?string $locale = null,
-        ?string  $queue = null
+        ?string $queue = null
     ): void
     {
         $phone = $this->validatePhoneNumber($phoneNumber);
