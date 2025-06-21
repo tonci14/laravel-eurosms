@@ -8,9 +8,10 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'username' => env('EURO_SMS_USERNAME'),
-    'password' => env('EURO_SMS_PASSWORD'),
-    'url' => env('EURO_SMS_URL', 'https://api.eurosms.com/api/v1/send'),
+    'url'            => env('EURO_SMS_URL', 'https://as.eurosms.com/sms/Sender'),
+    'integrationKey' => env('EUROSMS_KEY', null),
+    'integrationID'  => env('EUROSMS_ID', null),
+    'senderName'     => env('SMS_SENDER_NAME', null),
 
     /*
     |--------------------------------------------------------------------------

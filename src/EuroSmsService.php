@@ -40,12 +40,20 @@ class EuroSmsService
      * @throws GuzzleException
      * @throws InvalidArgumentException
      */
-    public function send(string $targetNumber, string $message, ?string $senderName = null): bool
+    public function send(string $phoneNumber, string $message, ?string $senderName = null): bool
     {
+        $phone = $this->validatePhoneNumber($phoneNumber);
+
+        foreach (['integrationID', 'integrationKey', 'senderName'] as $key) {
+            if (empty($this->config[$key])) {
+                throw new \InvalidArgumentException("Missing EuroSMS config value: {$key}");
+            }
+        }
+
         $senderName = strtolower($senderName ?? $this->defaultSenderName);
         self::validateSender($senderName);
 
-        $requestData = $this->buildRequest($targetNumber, $message, $senderName);
+        $requestData = $this->buildRequest($phone, $message, $senderName);
 
         $client = new Client(['verify' => false]);
         $result = $client->get(
@@ -123,5 +131,35 @@ class EuroSmsService
             'data' => $data,
         ];
     }
+
+    /**
+     * @param string $phone
+     * @return string
+     * @throws InvalidArgumentException
+     */
+    private function validatePhoneNumber(string $phone): string
+    {
+        $phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
+
+        try {
+            $numberProto = $phoneUtil->parse($phone, null);
+        } catch (\libphonenumber\NumberParseException $e) {
+            throw new \InvalidArgumentException("Invalid phone number format: $phone", 0, $e);
+        }
+
+        if (!$phoneUtil->isValidNumber($numberProto)) {
+            throw new \InvalidArgumentException("Phone number is not valid: $phone");
+        }
+
+        $region = $phoneUtil->getRegionCodeForNumber($numberProto);
+        $allowed = $this->config['allowed_countries'] ?? [];
+
+        if (!in_array(strtoupper($region), $allowed, true)) {
+            throw new \InvalidArgumentException("Phone number region '{$region}' is not allowed.");
+        }
+
+        return $phoneUtil->format($numberProto, \libphonenumber\PhoneNumberFormat::E164);
+    }
+
 
 }

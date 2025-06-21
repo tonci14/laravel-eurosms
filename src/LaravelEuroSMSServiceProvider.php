@@ -21,15 +21,21 @@ class LaravelEuroSMSServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
+            // Registrácia Artisan príkazov
             $this->commands([
                 \Tonci14\LaravelEuroSMS\Console\Commands\SendTestSmsCommand::class,
             ]);
 
+            // Registrácia publikovania configu
             $this->publishes([
                 __DIR__ . '/../config/eurosms.php' => config_path('eurosms.php'),
             ], 'eurosms-config');
 
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+            // Registrácia publikovania migrácií
+            $this->publishes([
+                __DIR__ . '/../database/migrations/2024_01_01_000000_create_euro_sms_queue_table.php' =>
+                    database_path('migrations/' . date('Y_m_d_His') . '_create_euro_sms_queue_table.php'),
+            ], 'eurosms-migrations');
         }
     }
 }

@@ -32,18 +32,20 @@ php artisan migrate
 V `.env` súbore:
 
 ```env
-EURO_SMS_USERNAME=your_eurosms_username
-EURO_SMS_PASSWORD=your_eurosms_password
-EURO_SMS_URL=https://api.eurosms.com/api/v1/send
+EURO_SMS_URL=https://as.eurosms.com/sms/Sender
+EUROSMS_KEY= -- provided key --
+EUROSMS_ID= -- privided ID --
+SMS_SENDER_NAME= -- use custom name up to 10 letters --
 ```
 
 V `config/eurosms.php`:
 
 ```php
 return [
-    'username' => env('EURO_SMS_USERNAME'),
-    'password' => env('EURO_SMS_PASSWORD'),
-    'url' => env('EURO_SMS_URL', 'https://api.eurosms.com/api/v1/send'),
+    'url'            => env('EURO_SMS_URL', 'https://as.eurosms.com/sms/Sender'),
+    'integrationKey' => env('EUROSMS_KEY', null),
+    'integrationID'  => env('EUROSMS_ID', null),
+    'senderName'     => env('SMS_SENDER_NAME', null),
 
     // Povolené krajiny podľa kódu ISO (2-písmenový)
     'allowed_countries' => ['SK', 'CZ', 'AT'],
