@@ -12,6 +12,7 @@ return [
     'integrationKey' => env('EUROSMS_KEY', null),
     'integrationID'  => env('EUROSMS_ID', null),
     'senderName'     => env('SMS_SENDER_NAME', null),
+    'queue'          => env('SMS_QUEUE', "default"),
 
     /*
     |--------------------------------------------------------------------------

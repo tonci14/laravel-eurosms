@@ -19,9 +19,9 @@ class EuroSmsTest extends TestCase
         EuroSms::send('+421900123456', 'Test SMS synchronne');
 
         $this->assertDatabaseHas('euro_sms_queue', [
-            'phone' => '+421900123456',
+            'phone'   => '+421900123456',
             'message' => 'Test SMS synchronne',
-            'status' => 'sent',
+            'status'  => 'sent',
         ]);
     }
 
@@ -30,7 +30,7 @@ class EuroSmsTest extends TestCase
     {
         Queue::fake();
 
-        EuroSms::sendAsync('+421900123456', 'Async test', null, 'messaging', 7);
+        EuroSms::sendAsync('+421900123456', 'Async test', 7, null, "sk", 'messaging');
 
         Queue::assertPushedOn('messaging', SendEuroSmsJob::class, function ($job) {
             return $job instanceof SendEuroSmsJob
@@ -59,15 +59,16 @@ class EuroSmsTest extends TestCase
     /** @test */
     public function it_logs_failed_sms_when_exception_thrown()
     {
-        $job = new SendEuroSmsJob('invalid', 'Failed test', null, 3);
+        $job = new SendEuroSmsJob('invalid', 'Failed test', null, null, 3);
 
         try {
             $job->handle();
-        } catch (\Throwable $throwable) {}
+        } catch (\Throwable $throwable) {
+        }
 
         $this->assertDatabaseHas('euro_sms_queue', [
-            'phone' => 'invalid',
-            'status' => 'failed',
+            'phone'   => 'invalid',
+            'status'  => 'failed',
             'user_id' => 3,
         ]);
     }

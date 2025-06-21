@@ -68,26 +68,26 @@ class EuroSmsService
     /**
      * @param string $phoneNumber
      * @param string $message
+     * @param int|null $userId
      * @param string|null $senderName
      * @param string|null $locale
-     * @param string $queue
-     * @param int|null $userId
+     * @param string|null $queue
      * @return void
      */
     public function sendAsync(
         string  $phoneNumber,
         string  $message,
+        ?int    $userId = null,
         ?string $senderName = null,
         ?string $locale = null,
-        string  $queue = 'default',
-        ?int    $userId = null
+        ?string  $queue = null
     ): void
     {
         $phone = $this->validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
         SendEuroSmsJob::dispatch($phone, $message, $senderName, $locale, $userId)
-            ->onQueue($queue);
+            ->onQueue($queue ?? $this->config['queue']);
     }
 
     /**
