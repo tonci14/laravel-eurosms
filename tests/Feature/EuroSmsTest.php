@@ -4,10 +4,10 @@ namespace Tonci14\LaravelEuroSMS\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Tests\TestCase;
 use Tonci14\LaravelEuroSMS\Facades\EuroSms;
 use Tonci14\LaravelEuroSMS\Jobs\SendEuroSmsJob;
 use Tonci14\LaravelEuroSMS\Services\EuroSmsService;
-use Tests\TestCase;
 
 class EuroSmsTest extends TestCase
 {

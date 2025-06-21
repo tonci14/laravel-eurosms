@@ -11,7 +11,6 @@ Podporuje:
 - Facade `EuroSms::send(...)` a `EuroSms::sendAsync(...)`
 
 ---
-
 ## 💡 Inštalácia
 
 ```bash
@@ -47,9 +46,18 @@ return [
     'integrationID'  => env('EUROSMS_ID', null),
     'senderName'     => env('SMS_SENDER_NAME', null),
 
-    // Povolené krajiny podľa kódu ISO (2-písmenový)
-    'allowed_countries' => ['SK', 'CZ', 'AT'],
+    // Povolené krajiny podľa kódu ISO (2-písmenový) napr: 'SK', 'CZ', 'AT'
+    'allowed_countries' => [],
 ];
+```
+
+### 🔹 Inštalácia
+
+```bash
+php artisan vendor:publish --tag=eurosms-migrations
+php artisan vendor:publish --tag=eurosms-config
+
+php artisan migrate
 ```
 
 ---
@@ -104,16 +112,16 @@ EuroSms::send('+441234567890', 'UK test');
 
 Každá správa sa loguje do databázy:
 
-| Stĺpec     | Popis                          |
-|------------|--------------------------------|
-| `id`       | Primárny kľúč                  |
-| `user_id`  | Voliteľný ID používateľa       |
-| `phone`    | Telefónne číslo                |
-| `message`  | Obsah správy                   |
-| `status`   | `sent`, `failed`, `pending`    |
-| `error`    | Chyba (ak nastala)             |
-| `sent_at`  | Čas odoslania správy           |
-| `created_at`, `updated_at` | Laravel timestamps |
+| Stĺpec                     | Popis                       |
+|----------------------------|-----------------------------|
+| `id`                       | Primárny kľúč               |
+| `user_id`                  | Voliteľný ID používateľa    |
+| `phone`                    | Telefónne číslo             |
+| `message`                  | Obsah správy                |
+| `status`                   | `sent`, `failed`, `pending` |
+| `error`                    | Chyba (ak nastala)          |
+| `sent_at`                  | Čas odoslania správy        |
+| `created_at`, `updated_at` | Laravel timestamps          |
 
 ---
 

@@ -8,8 +8,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Tonci14\LaravelEuroSMS\Facades\EuroSms;
-use Tonci14\LaravelEuroSMS\Models\SmsMessage;
-use Throwable;
 
 class SendEuroSmsJob implements ShouldQueue
 {
