@@ -58,7 +58,7 @@ class EuroSmsService
                 'error'   => $error,
                 'sent_at' => null,
             ]);
-            throw new \Exception('Failed to send sms with error: ' . $result->getReasonPhrase());
+            throw new \Exception("Failed to send sms with error: \n" . $error);
         }
 
         SmsMessage::create([
