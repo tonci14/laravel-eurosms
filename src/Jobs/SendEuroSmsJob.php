@@ -17,13 +17,15 @@ class SendEuroSmsJob implements ShouldQueue
 
     protected string $phoneNumber;
     protected string $content;
-    protected string $locale;
+    protected ?string $senderName;
+    protected ?string $locale;
     public ?int$userId;
 
-    public function __construct(string $phoneNumber, string $content, ?string $locale = null, ?int $userId = null)
+    public function __construct(string $phoneNumber, string $content, ?string $senderName = null,  ?string $locale = null, ?int $userId = null)
     {
         $this->phoneNumber = $phoneNumber;
         $this->content = $content;
+        $this->senderName = $senderName;
         $this->locale = $locale;
         $this->userId = $userId;
     }
@@ -33,24 +35,7 @@ class SendEuroSmsJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $status = 'sent';
-        $error = null;
-
-        try {
-            EuroSms::send($this->phoneNumber, $this->content);
-        } catch (Throwable $e) {
-            $status = 'failed';
-            $error = $e->getMessage();
-        }
-
-        SmsMessage::create([
-            'user_id' => $this->userId,
-            'phone' => $this->phoneNumber,
-            'message' => $this->content,
-            'status' => $status,
-            'error' => $error,
-            'sent_at' => $status === 'sent' ? now() : null,
-        ]);
+        EuroSms::send($this->phoneNumber, $this->content, $this->userId, $this->senderName);
     }
 
     /**

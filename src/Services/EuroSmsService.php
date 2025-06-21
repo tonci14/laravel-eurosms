@@ -3,11 +3,13 @@
 namespace Tonci14\LaravelEuroSMS\Services;
 
 use GuzzleHttp\Client;
-use libphonenumber\PhoneNumberUtil;
-use libphonenumber\PhoneNumberFormat;
+use GuzzleHttp\Exception\GuzzleException;
 use libphonenumber\NumberParseException;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use Tonci14\LaravelEuroSMS\Exceptions\InvalidArgumentException;
 use Tonci14\LaravelEuroSMS\Jobs\SendEuroSmsJob;
+use Tonci14\LaravelEuroSMS\Models\SmsMessage;
 
 class EuroSmsService
 {
@@ -15,44 +17,76 @@ class EuroSmsService
 
     private array $config;
 
-    public function __construct(array $config) {
+    public function __construct(array $config)
+    {
         $this->config = $config;
     }
 
     /**
      * @param string $phoneNumber
      * @param string $message
+     * @param int|null $userId
+     * @param string|null $senderName
      * @return void
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
-    public function send(string $phoneNumber, string $message): void
+    public function send(string $phoneNumber, string $message, ?int $userId = null, ?string $senderName = null): void
     {
         $phone = $this->validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
+        $requestData = $this->buildRequest($phone, $message, $senderName);
+
         $client = new Client();
-        $client->post($this->config['url'], self::buildRequest($phone, $message, $this->config['senderName']));
+        $result = $client->get(
+            $this->config['url'] . "?" . http_build_query($requestData['data']), $requestData['headers']
+        );
+        $sent = $result->getStatusCode() == 200;
+
+        if (!$sent) {
+            SmsMessage::create([
+                'user_id' => $userId,
+                'phone'   => $phone,
+                'message' => $message,
+                'status'  => 'sent',
+                'error'   => $result->getBody()->getContents(),
+                'sent_at' => null,
+            ]);
+            throw new \Exception('Failed to send sms with error: ' . $result->getReasonPhrase());
+        }
+
+        SmsMessage::create([
+            'user_id' => $userId,
+            'phone'   => $phone,
+            'message' => $message,
+            'status'  => 'sent',
+            'error'   => null,
+            'sent_at' => now(),
+        ]);
     }
 
     /**
      * @param string $phoneNumber
      * @param string $message
+     * @param string|null $senderName
      * @param string|null $locale
      * @param string $queue
      * @param int|null $userId
      * @return void
      */
     public function sendAsync(
-        string $phoneNumber,
-        string $message,
+        string  $phoneNumber,
+        string  $message,
+        ?string $senderName = null,
         ?string $locale = null,
-        string $queue = 'default',
-        ?int $userId = null
-    ): void {
+        string  $queue = 'default',
+        ?int    $userId = null
+    ): void
+    {
         $phone = $this->validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
-        SendEuroSmsJob::dispatch($phone, $message, $locale, $userId)
+        SendEuroSmsJob::dispatch($phone, $message, $senderName, $locale, $userId)
             ->onQueue($queue);
     }
 
@@ -96,7 +130,7 @@ class EuroSmsService
             }
         }
 
-        if(strlen($this->config['senderName']) > self::MAX_SENDER_NAME_LENGTH){
+        if (strlen($this->config['senderName']) > self::MAX_SENDER_NAME_LENGTH) {
             throw new InvalidArgumentException("MAX_SENDER_LENGTH_IS_" . self::MAX_SENDER_NAME_LENGTH, 400);
         }
     }
@@ -129,16 +163,16 @@ class EuroSmsService
 
         $data = [
             'action' => 'send1SMSHTTP',
-            'i' => $this->config['integrationID'],
-            's' => $sign,
-            'sender' => $senderName,
+            'i'      => $this->config['integrationID'],
+            's'      => $sign,
+            'sender' => $senderName ?? $this->config['senderName'],
             'number' => $targetNumber,
-            'msg' => $content
+            'msg'    => $content,
         ];
 
         return [
             'headers' => $headers,
-            'data' => $data,
+            'data'    => $data,
         ];
     }
 }
