@@ -6,10 +6,13 @@ use GuzzleHttp\Client;
 use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\NumberParseException;
+use Tonci14\LaravelEuroSMS\Exceptions\InvalidArgumentException;
 use Tonci14\LaravelEuroSMS\Jobs\SendEuroSmsJob;
 
 class EuroSmsService
 {
+    const MAX_SENDER_NAME_LENGTH = 11;
+
     private array $config;
 
     public function __construct(array $config) {
@@ -25,6 +28,7 @@ class EuroSmsService
     public function send(string $phoneNumber, string $message): void
     {
         $phone = $this->validatePhoneNumber($phoneNumber);
+        $this->validateConfiguration();
 
         $client = new Client();
         $client->post($this->config['url'], self::buildRequest($phone, $message, $this->config['senderName']));
@@ -46,6 +50,7 @@ class EuroSmsService
         ?int $userId = null
     ): void {
         $phone = $this->validatePhoneNumber($phoneNumber);
+        $this->validateConfiguration();
 
         SendEuroSmsJob::dispatch($phone, $message, $locale, $userId)
             ->onQueue($queue);
@@ -72,11 +77,28 @@ class EuroSmsService
         $region = $phoneUtil->getRegionCodeForNumber($numberProto);
         $allowed = $this->config['allowed_countries'] ?? [];
 
-        if (!in_array(strtoupper($region), $allowed, true)) {
+        if (!empty($allowed) && !in_array(strtoupper($region), $allowed, true)) {
             throw new \InvalidArgumentException("Phone number region '{$region}' is not allowed.");
         }
 
         return $phoneUtil->format($numberProto, PhoneNumberFormat::E164);
+    }
+
+    /**
+     * @return void
+     * @throws InvalidArgumentException
+     */
+    private function validateConfiguration(): void
+    {
+        foreach (['url', 'integrationID', 'integrationKey', 'senderName'] as $key) {
+            if (empty($this->config[$key])) {
+                throw new \InvalidArgumentException("Missing EuroSMS config value: {$key}");
+            }
+        }
+
+        if(strlen($this->config['senderName']) > self::MAX_SENDER_NAME_LENGTH){
+            throw new InvalidArgumentException("MAX_SENDER_LENGTH_IS_" . self::MAX_SENDER_NAME_LENGTH, 400);
+        }
     }
 
     /**

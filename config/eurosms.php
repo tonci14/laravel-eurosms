@@ -20,6 +20,6 @@ return [
     | Napr. ['SK', 'CZ', 'AT']
     */
 
-    'allowed_countries' => ['SK', 'CZ', 'AT'],
+    'allowed_countries' => [],
 
 ];
