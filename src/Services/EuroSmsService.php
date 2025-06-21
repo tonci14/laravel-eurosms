@@ -16,20 +16,28 @@ class EuroSmsService
         $this->config = $config;
     }
 
+    /**
+     * @param string $phoneNumber
+     * @param string $message
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function send(string $phoneNumber, string $message): void
     {
         $phone = $this->validatePhoneNumber($phoneNumber);
 
         $client = new Client();
-        $client->post($this->config['url'], [
-            'auth' => [$this->config['username'], $this->config['password']],
-            'form_params' => [
-                'to' => $phone,
-                'text' => $message,
-            ],
-        ]);
+        $client->post($this->config['url'], self::buildRequest($phone, $message, $this->config['senderName']));
     }
 
+    /**
+     * @param string $phoneNumber
+     * @param string $message
+     * @param string|null $locale
+     * @param string $queue
+     * @param int|null $userId
+     * @return void
+     */
     public function sendAsync(
         string $phoneNumber,
         string $message,
@@ -43,6 +51,10 @@ class EuroSmsService
             ->onQueue($queue);
     }
 
+    /**
+     * @param string $phone
+     * @return string
+     */
     private function validatePhoneNumber(string $phone): string
     {
         $phoneUtil = PhoneNumberUtil::getInstance();
@@ -65,5 +77,46 @@ class EuroSmsService
         }
 
         return $phoneUtil->format($numberProto, PhoneNumberFormat::E164);
+    }
+
+    /**
+     * @param string $targetNumber
+     * @param string $content
+     * @param string|null $senderName
+     * @return array
+     * @phpstan-return array{
+     *     headers: array{Accept: 'application/text'},
+     *     data: array{
+     *              action: 'send1SMSHTTP',
+     *              i: string,
+     *              s: string,
+     *              sender: string|null,
+     *              number: string,
+     *              msg: string
+     *      }
+     *  }
+     */
+    private function buildRequest(string $targetNumber, string $content, ?string $senderName = null): array
+    {
+        $md5 = md5($this->config['integrationKey'] . $targetNumber);
+        $sign = substr($md5, 10, 11);
+
+        $headers = [
+            'Accept' => 'application/text',
+        ];
+
+        $data = [
+            'action' => 'send1SMSHTTP',
+            'i' => $this->config['integrationID'],
+            's' => $sign,
+            'sender' => $senderName,
+            'number' => $targetNumber,
+            'msg' => $content
+        ];
+
+        return [
+            'headers' => $headers,
+            'data' => $data,
+        ];
     }
 }
