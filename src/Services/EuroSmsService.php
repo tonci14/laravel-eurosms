@@ -32,10 +32,10 @@ class EuroSmsService
      */
     public function send(string $phoneNumber, string $message, ?int $userId = null, ?string $senderName = null): void
     {
-        $phone = $this->validatePhoneNumber($phoneNumber);
+        $phone = self::validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
-        if ($phoneNumber !== "+421900000000") {
+        if ($phone !== "+421900000000") {
             $requestData = $this->buildRequest($phone, $message, $senderName);
 
             $client = new Client();
@@ -89,7 +89,7 @@ class EuroSmsService
         ?string $queue = null
     ): void
     {
-        $phone = $this->validatePhoneNumber($phoneNumber);
+        $phone = self::validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
         SendEuroSmsJob::dispatch($phone, $message, $senderName, $locale, $userId)
@@ -99,8 +99,9 @@ class EuroSmsService
     /**
      * @param string $phone
      * @return string
+     * @throws InvalidArgumentException
      */
-    private function validatePhoneNumber(string $phone): string
+    public static function validatePhoneNumber(string $phone): string
     {
         $phoneUtil = PhoneNumberUtil::getInstance();
 
@@ -115,8 +116,7 @@ class EuroSmsService
         }
 
         $region = $phoneUtil->getRegionCodeForNumber($numberProto);
-        $allowed = $this->config['allowed_countries'] ?? [];
-
+        $allowed = config('eurosms.allowed_countries') ?? [];
         if (!empty($allowed) && !in_array(strtoupper($region), $allowed, true)) {
             throw new \InvalidArgumentException("Phone number region '{$region}' is not allowed.");
         }

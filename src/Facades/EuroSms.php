@@ -10,6 +10,7 @@ use Tonci14\LaravelEuroSMS\Fakes\EuroSmsFake;
  *
  * @method static void send(string $phoneNumber, string $message, int|null $userId = null, string|null $senderName = null)
  * @method static void sendAsync(string $phoneNumber, string $message, int|null $userId = null, string|null $senderName = null, string|null $queue = null)
+ * @method static string validatePhoneNumber(string $phoneNumber)
  *
  * @see \Tonci14\LaravelEuroSMS\Services\EuroSmsService
  */
