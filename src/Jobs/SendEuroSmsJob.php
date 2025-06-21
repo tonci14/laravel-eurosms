@@ -16,22 +16,19 @@ class SendEuroSmsJob implements ShouldQueue
     protected string $phoneNumber;
     protected string $content;
     protected ?string $senderName;
-    protected ?string $locale;
     public ?int$userId;
 
     /**
      * @param string $phoneNumber
      * @param string $content
      * @param string|null $senderName
-     * @param string|null $locale
      * @param int|null $userId
      */
-    public function __construct(string $phoneNumber, string $content, ?string $senderName = null, ?string $locale = null, ?int $userId = null)
+    public function __construct(string $phoneNumber, string $content, ?string $senderName = null, ?int $userId = null)
     {
         $this->phoneNumber = $phoneNumber;
         $this->content = $content;
         $this->senderName = $senderName;
-        $this->locale = $locale;
         $this->userId = $userId;
     }
 
@@ -57,14 +54,6 @@ class SendEuroSmsJob implements ShouldQueue
     public function getContent(): string
     {
         return $this->content;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLocale(): string
-    {
-        return $this->locale;
     }
 
     /**

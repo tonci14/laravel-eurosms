@@ -27,10 +27,11 @@ class EuroSmsService
      * @param string $message
      * @param int|null $userId
      * @param string|null $senderName
+     * @param string|null $locale
      * @return void
      * @throws GuzzleException
      */
-    public function send(string $phoneNumber, string $message, ?int $userId = null, ?string $senderName = null): void
+    public function send(string $phoneNumber, string $message, ?int $userId = null, ?string $senderName = null, ?string $locale = null): void
     {
         $phone = $this->validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();

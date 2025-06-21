@@ -59,7 +59,7 @@ class EuroSmsTest extends TestCase
     /** @test */
     public function it_logs_failed_sms_when_exception_thrown()
     {
-        $job = new SendEuroSmsJob('invalid', 'Failed test', null, null, 3);
+        $job = new SendEuroSmsJob('invalid', 'Failed test', null, 3);
 
         try {
             $job->handle();
