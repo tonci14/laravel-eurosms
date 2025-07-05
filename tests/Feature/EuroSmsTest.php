@@ -30,7 +30,7 @@ class EuroSmsTest extends TestCase
     {
         Queue::fake();
 
-        EuroSms::sendAsync('+421900123456', 'Async test', 7, null, "sk", 'messaging');
+        EuroSms::sendAsync('+421900123456', 'Async test', 7, null, 'messaging');
 
         Queue::assertPushedOn('messaging', SendEuroSmsJob::class, function ($job) {
             return $job instanceof SendEuroSmsJob

@@ -30,7 +30,7 @@ class TestInit extends TestCase
     {
         $this->testInit();
         try {
-            $this->service->sendAsync("", "", "123456789123456789");
+            $this->service->sendAsync("", "", 0, "123456789123456789");
         } catch (InvalidArgumentException $exception) {
             $this->assertEquals("MAX_SENDER_LENGTH_IS_" . EuroSmsService::MAX_SENDER_NAME_LENGTH, $exception->getMessage());
         }

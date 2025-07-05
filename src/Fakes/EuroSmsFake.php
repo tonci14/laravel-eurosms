@@ -43,9 +43,9 @@ class EuroSmsFake extends EuroSmsService
      * @param string|null $queue
      * @return void
      */
-    public function sendAsync(string $phoneNumber, string $message, ?int $userId = null, ?string $senderName = null, ?string $locale = null, ?string $queue = null): void
+    public function sendAsync(string $phoneNumber, string $message, ?int $userId = null, ?string $senderName = null, ?string $queue = null): void
     {
-        $this->sentMessages[] = compact('phoneNumber', 'message', 'userId', 'senderName', 'locale', 'queue');
+        $this->sentMessages[] = compact('phoneNumber', 'message', 'userId', 'senderName', 'queue');
     }
 
     /**

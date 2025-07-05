@@ -76,7 +76,6 @@ class EuroSmsService
      * @param string $message
      * @param int|null $userId
      * @param string|null $senderName
-     * @param string|null $locale
      * @param string|null $queue
      * @return void
      */
@@ -85,14 +84,13 @@ class EuroSmsService
         string  $message,
         ?int    $userId = null,
         ?string $senderName = null,
-        ?string $locale = null,
         ?string $queue = null
     ): void
     {
         $phone = self::validatePhoneNumber($phoneNumber);
         $this->validateConfiguration();
 
-        SendEuroSmsJob::dispatch($phone, $message, $senderName, $locale, $userId)
+        dispatch(new SendEuroSmsJob($phone, $message, $senderName, $userId))
             ->onQueue($queue ?? $this->config['queue']);
     }
 
